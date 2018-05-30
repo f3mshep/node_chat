@@ -13,7 +13,6 @@ socket.on('newMessage', function (message) {
   console.log('is this thing on')
   const li = $('<li></li>')
   li.text(`${message.from}: ${message.text}`)
-  debugger
   $('#messages').append(li)
 })
 
@@ -26,13 +25,15 @@ socket.emit('createMessage', {
 
 $(document).ready(
   function () {
+    const messageTextbox = $('[name=message]')
+    //send button
     $('#message-form').submit(function (e) {
       e.preventDefault()
       socket.emit('createMessage', {
         from: 'User',
-        text: $('[name=message]').val()
+        text: messageTextbox.val()
       }, function () {
-
+        messageTextbox.val('')
       }
       );
     })

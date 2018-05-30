@@ -5,21 +5,27 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>NodeChat</title>
   <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/styles.css" />
   <script src="/socket.io/socket.io.js"></script>
   <script src='/js/libs/jquery.min.js'></script>
   <script src="/js/index.js"></script>
 </head>
-<body>
-  <h1>Welcome to NodeChat</h1>
-  <div>
-    <ol id="messages">
+<body class="chat">
 
-    </ol>
+  <div class="chat__sidebar">
+    <h3>Users</h3>
+    <div id="users"></div>
   </div>
-  <form id="message-form">
-    <input type="text" name="message" placeholder="Message" />
-    <button>Send</button>
-  </form>
+
+  <div class="chat__main">
+    <ol id="messages" class="chat__messages"></ol>
+
+    <div class="chat__footer">
+      <form id="message-form">
+        <input name="message" type="text" placeholder="Message" autofocus autocomplete="off" />
+        <button>Send</button>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
