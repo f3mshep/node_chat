@@ -1,5 +1,7 @@
 const socket = io();
 
+var date = new Date()
+
 socket.on('connect', function () {
   console.log('Connected to server')
 });
@@ -16,12 +18,22 @@ socket.on('newMessage', function (message) {
   $('#messages').append(li)
 })
 
-socket.emit('createMessage', {
-  from: 'JimmyHere',
-  text: 'It is Wednesday my dudes.'
-}, function (data) {
-  console.log('Acknowledged', data)
-});
+if(date.getUTCDay() === 3){
+  socket.emit('createMessage', {
+    from: 'Admin',
+    text: 'It is Wednesday my dudes.'
+  }, function (data) {
+    console.log('Acknowledged', data)
+  });
+} else {
+  socket.emit('createMessage', {
+    from: 'Admin',
+    text: 'Is this thing on?'
+  }, function (data) {
+    console.log('Acknowledged', data)
+  });
+}
+
 
 $(document).ready(
   function () {
