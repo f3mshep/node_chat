@@ -18,8 +18,8 @@ socket.on('newMessage', function (message) {
 })
 
 socket.emit('createMessage', {
-  from: 'Frank',
-  text: 'Hello my dudes'
+  from: 'JimmyHere',
+  text: 'It is Wednesday my dudes.'
 }, function (data) {
   console.log('Acknowledged', data)
 });
