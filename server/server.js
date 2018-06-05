@@ -5,14 +5,16 @@ const http = require('http');
 
 const {generateMessage} = require('./utils/message')
 
-PORT = process.env.PORT || 3000
+PORT = process.env.PORT || 5000
 
-const publicPath = path.join(__dirname, '../public');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-app.use(express.static(publicPath));
+
+app.get("/api/hello", (req, res) => {
+  res.send({ express: "Hello From Express" });
+});
 
 io.on('connection', (socket)=>{
   console.log('New user connected')
@@ -39,5 +41,5 @@ io.on('connection', (socket)=>{
 
 
 server.listen(PORT, ()=>{
-  console.log(`Started on ${PORT}`)
+  console.log(`Listening on ${PORT}`)
 });
