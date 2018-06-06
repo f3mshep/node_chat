@@ -16,7 +16,6 @@ class ChatMessages extends React.Component{
   }
 
   componentDidUpdate(){
-    console.log('messages updated')
     this.scrollToBottom();
   }
 

@@ -106,11 +106,21 @@ button:disabled {
 }
 
 .chat__sidebar li {
-  background: #e6eaee;
-  border: 1px solid #e1e1e1;
   border-radius: 5px;
-  padding: 10px;
-  margin: 10px;
+  color: #e6eaee;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 9px;
+
+}
+
+.chat__sidebar li:before {
+    content: '○';
+    margin: 0 0.5em;
+}
+
+.chat__sidebar li:hover {
+  background-color: #1F4C69;
 }
 
 .chat__main {
