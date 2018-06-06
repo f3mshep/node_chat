@@ -11,9 +11,19 @@ class ChatMessages extends React.Component{
     );
   }
 
+  scrollToBottom(){
+    this.el.scrollIntoView({behavior: 'smooth'});
+  }
+
+  componentDidUpdate(){
+    console.log('messages updated')
+    this.scrollToBottom();
+  }
+
   render(){
     return <ol id="messages" className="chat__messages" >
       {this.renderMessages()}
+      <div ref={el => {this.el = el}}/>
     </ol>;
   }
 }
