@@ -2,12 +2,10 @@ import React from 'react';
 
 import SidebarUser from './sidebar_user';
 
-const users = [{userName: "Admin"}, {userName: "User"}]
-
 class ChatSidebar extends React.Component{
 
   renderUsers(){
-    return users.map(user => <SidebarUser userName={user.userName} />)
+    return this.props.users.map(user => <SidebarUser userName={user} />)
   }
 
   render(){

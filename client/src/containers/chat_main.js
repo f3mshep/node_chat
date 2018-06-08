@@ -4,12 +4,14 @@ import io from 'socket.io-client';
 import ChatMessages from './chat_messages'
 import ChatFooter from './chat_footer'
 import ChatSidebar from '../components/chat_sidebar'
+import SignIn from '../components/sign_in_component'
 
 class ChatMain extends React.Component{
 
   constructor(props){
     super(props)
     this.state = {
+      signedIn: false,
       users: [],
       messages: [],
       clientSocket: null
@@ -31,6 +33,16 @@ class ChatMain extends React.Component{
     let currentMessages = this.state.messages
     currentMessages.push(message)
     this.setState({messages: currentMessages})
+  }
+
+  handleSignIn(username, password){
+    const socket = this.state.clientSocket
+    socket.emit('signOn', {username, password})
+    this.setState({signedIn: true})
+  }
+
+  updateUsers(users){
+    this.setState({users})
   }
 
   componentDidMount(){
@@ -61,21 +73,22 @@ class ChatMain extends React.Component{
       console.log('Disconnected from server')
     })
 
+    socket.on('userJoin', this.updateUsers.bind(this))
+
     socket.on("newMessage", this.recieveMessage.bind(this));
 
   }
 
   render(){
-
-
-    return(
-      <div className="chat">
-        <ChatSidebar />
-        <div className="chat__main">
-          <ChatMessages messages={this.state.messages} />
-          <ChatFooter sendMessage={this.sendMessage.bind(this)} />
-        </div>
-      </div>)
+    const chatPage = <div className="chat">
+      <ChatSidebar users={this.state.users} />
+      <div className="chat__main">
+        <ChatMessages messages={this.state.messages} />
+        <ChatFooter sendMessage={this.sendMessage.bind(this)} />
+      </div>
+    </div>;
+    const signIn = <SignIn handleSignIn={this.handleSignIn.bind(this)}/>
+    return this.state.signedIn ? chatPage : signIn
   }
 }
 

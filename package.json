@@ -6,7 +6,9 @@
   "scripts": {
     "client": "cd client && npm run start",
     "server": "nodemon server/server.js",
-    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+    "debug": "node inspect server/server.js",
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\"",
+    "dev_debug": "concurrently --kill-others-on-fail \"npm run debug\" \"npm run client\""
   },
   "engines": {
     "node": "10.0.0"
@@ -14,8 +16,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.16.3",
+    "jsonwebtoken": "^8.2.2",
+    "lodash": "^4.17.10",
     "moment": "^2.22.1",
+    "mongoose": "^5.1.4",
+    "mongodb": "^3.1.0-beta4",
     "nodemon": "^1.17.5",
     "socket.io": "^2.1.1"
   },
