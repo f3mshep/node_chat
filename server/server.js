@@ -1,6 +1,7 @@
 require("./config/config");
 
 const path = require('path');
+const bodyParser = require("body-parser");
 const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
@@ -19,6 +20,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
+app.use(bodyParser.json());
 
 app.get("/api/hello", (req, res) => {
   res.send({ express: "Hello From Express" });
@@ -26,13 +28,13 @@ app.get("/api/hello", (req, res) => {
 
 io.on('connection', (socket)=>{
   console.log('New client connected')
-
+  socket.authenticated = false
   socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-
   socket.broadcast.emit("newMessage", generateMessage("Admin","New user joined"));
 
   socket.on('signOn', data => {
     socket.username =  data.username
+    socket.authenticated = true
     let users = connectedUsers(io.sockets.connected)
     socket.emit('userJoin', users)
   })
@@ -55,10 +57,23 @@ io.on('connection', (socket)=>{
 app.post('/users', (req, res)=>{
   const body = _.pick(req.body, ['username', 'password'])
   const newUser = new User(body);
-  newUser.save()
-  .then(()=>newUser.generateAuthToken())
-  .then(token => res.header('x-auth', token).send(newUser))
-  .catch((error) => res.status(400).send({ error }));
+  newUser.save().then(() => {
+    return newUser.generateAuthToken();
+  })
+    .then((token) => {
+      return res.header('x-auth', token).send(newUser);
+    }).catch((error) => res.status(400).send({ error }));
+});
+
+app.post('/users/login', (req, res)=>{
+  const body = _.pick(req.body, ['username', 'password'])
+  User.findByCredentials(body)
+  .then(doc => {
+    return doc.generateAuthToken()
+    .then(token => {
+      res.header('x-auth', token).send(doc)
+    })
+  })
 });
 
 

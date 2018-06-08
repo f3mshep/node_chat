@@ -53,13 +53,13 @@ UserSchema.methods.removeToken = function  (token) {
 };
 
 UserSchema.methods.generateAuthToken = function () {
-  const user = this;
-  const access = AUTH;
-  const token = jwt.sign({_id: user.id.toHexString(), access}, SALT).toString();
+  let user = this;
+  let access = AUTH;
+  let token = jwt.sign({ _id: user._id.toHexString(), access }, SALT).toString();
 
-  user.tokens.push({access, token});
+  user.tokens.push({ access, token });
 
-  return user.save().then(()=> {
+  return user.save().then(() => {
     return token;
   })
 }
