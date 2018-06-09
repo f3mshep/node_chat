@@ -10,7 +10,7 @@ const _ = require('lodash');
 const { ObjectID } = require("mongodb");
 
 const {generateMessage} = require('./utils/message')
-const {connectedUsers} = require('./utils/connected_users')
+const { getConnectedUsernames } = require('./utils/connected_users')
 const { User } = require('./models/user');
 const { isValidToken } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongo');
@@ -33,14 +33,15 @@ io.on('connection', (socket)=>{
 
   socket.on('authenticate',token => {
     if(isValidToken(token)){
+      //change this, find User by token, then add info to socket.
       console.log('handshake confirmed')
       socket.emit('authenticated')
-        console.log('authenticated server side')
-        socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
+      let users = getConnectedUsernames(io.sockets.connected)
+      socket.emit('updateUsers', users)
+      socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
         socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
         socket.authenticated = true
-        let users = connectedUsers(io.sockets.connected)
-        socket.emit('userJoin', users)
+
 
         socket.on('createMessage', (message, callback) => {
           console.log('New Message: ', message)

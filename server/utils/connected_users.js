@@ -1,9 +1,15 @@
-const connectedUsers = (sockets)=>{
+const getConnectedUsers = (sockets)=>{
   users = []
   for (const client in sockets){
-    users.push(sockets[client].username);
+    users.push(sockets[client]);
   }
   return users;
 }
 
-module.exports = {connectedUsers}
+const getConnectedUsernames = (sockets) => {
+  users = getConnectedUsers(sockets)
+  console.log(users)
+  return users.map(user => user.username)
+}
+
+module.exports = {getConnectedUsernames}

@@ -45,22 +45,14 @@ class ChatMain extends React.Component{
     })
     .then(response => {
       if(!response.ok){
-<<<<<<< HEAD
         console.log(response)
-=======
-        console.log('bad attempt')
->>>>>>> 0f3b9a4b8d456aa554d716494dea5921862931e8
       } else {
         return response.json()
       }
     })
     .then(token => {
       localStorage.setItem("jwt", token)
-<<<<<<< HEAD
       socket.emit('authenticate', token)
-=======
-      socket.emit('authentication', {token})
->>>>>>> 0f3b9a4b8d456aa554d716494dea5921862931e8
     })
   }
 
@@ -85,30 +77,15 @@ class ChatMain extends React.Component{
       console.log('user authenticated')
       socket.on("newMessage", this.recieveMessage.bind(this));
       socket.on("userJoin", this.updateUsers.bind(this));
-      if (new Date().getUTCDay() === 3) {
-        socket.emit('createMessage', {
-          from: 'Admin',
-          text: 'It is Wednesday my dudes.'
-        }, function (data) {
-          console.log('Acknowledged', data)
-        });
-      } else {
-        socket.emit('createMessage', {
-          from: 'Admin',
-          text: 'Is this thing on?'
-        }, function (data) {
-          console.log('Acknowledged', data)
-        });
-      }
+    })
+
+    socket.on('updateUsers', (users)=> {
+      this.updateUsers(users)
     })
 
     socket.on('disconnect', () => {
       console.log('Disconnected from server')
     })
-
-
-
-
 
   }
 
