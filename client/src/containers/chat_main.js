@@ -38,7 +38,6 @@ class ChatMain extends React.Component{
   handleSignIn(username, password){
     const socket = this.state.clientSocket;
     const request = {username, password};
-    const that =  this;
     fetch("/users", {
       method: "post",
       headers: {"Content-Type": "application/json"},
@@ -46,19 +45,19 @@ class ChatMain extends React.Component{
     })
     .then(response => {
       if(!response.ok){
-        debugger
-        console.log('bad attempt')
+        console.log(response)
       } else {
         return response.json()
       }
     })
     .then(token => {
-      debugger
       localStorage.setItem("jwt", token)
-      socket.emit('authenticationAttempt')
-      socket.emit('authenticate', {token})
-      that.setState({signedIn: true})
+      socket.emit('authenticate', token)
     })
+  }
+
+  handleAuthentication(){
+    this.setState({signedIn: true})
   }
 
   updateUsers(users){
@@ -74,6 +73,7 @@ class ChatMain extends React.Component{
     });
 
     socket.on('authenticated', ()=>{
+      this.handleAuthentication()
       console.log('user authenticated')
       socket.on("newMessage", this.recieveMessage.bind(this));
       socket.on("userJoin", this.updateUsers.bind(this));

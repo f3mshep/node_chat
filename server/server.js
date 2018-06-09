@@ -12,7 +12,7 @@ const { ObjectID } = require("mongodb");
 const {generateMessage} = require('./utils/message')
 const {connectedUsers} = require('./utils/connected_users')
 const { User } = require('./models/user');
-const { authenticate } = require('./middleware/authenticate');
+const { isValidToken } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongo');
 
 PORT = process.env.PORT || 5000
@@ -31,30 +31,31 @@ io.on('connection', (socket)=>{
   console.log('New client connected')
   socket.authenticated = false
 
-  socket.on('authenticationAttempt', socketioJwt.authorize({
-    secret: SECRET,
-    timeout: 20000
-  }).bind(socket)).on('authenticated', socket => {
-    socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-    socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
-    socket.username = data.username
-    socket.authenticated = true
-    let users = connectedUsers(io.sockets.connected)
-    socket.emit('userJoin', users)
+  socket.on('authenticate',token => {
+    if(isValidToken(token)){
+      console.log('handshake confirmed')
+      socket.emit('authenticated')
+        console.log('authenticated server side')
+        socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
+        socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
+        socket.authenticated = true
+        let users = connectedUsers(io.sockets.connected)
+        socket.emit('userJoin', users)
 
-    socket.on('createMessage', (message, callback) => {
-      console.log('New Message: ', message)
-      io.emit('newMessage', generateMessage(socket.username, message.text));
-      callback('Acknowledged');
-    });
+        socket.on('createMessage', (message, callback) => {
+          console.log('New Message: ', message)
+          io.emit('newMessage', generateMessage(socket.username, message.text));
+          callback('Acknowledged');
+        });
 
-    socket.on('disconnect', () => {
-      console.log('User disconnected')
-    });
+        socket.on('disconnect', () => {
+          console.log('User disconnected')
+        });
+    } else {
+      console.log("handshake rejected");
+      socket.emit('rejected');
+    }
   })
-
-
-
 
 });
 
