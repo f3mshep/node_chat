@@ -29,7 +29,6 @@ app.get("/api/hello", (req, res) => {
 
 io.on('connection', (socket)=>{
   console.log('New client connected')
-  socket.authenticated = false
 
   socket.on('authenticate',token => {
     if(isValidToken(token)){
@@ -38,20 +37,18 @@ io.on('connection', (socket)=>{
       socket.emit('authenticated')
       let users = getConnectedUsernames(io.sockets.connected)
       socket.emit('updateUsers', users)
+      //handle creating new messages
       socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-        socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
-        socket.authenticated = true
+      socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
+      socket.on('createMessage', (message, callback) => {
+        console.log('New Message: ', message)
+        io.emit('newMessage', generateMessage(socket.username, message.text));
+        callback('Acknowledged');
+      });
 
-
-        socket.on('createMessage', (message, callback) => {
-          console.log('New Message: ', message)
-          io.emit('newMessage', generateMessage(socket.username, message.text));
-          callback('Acknowledged');
-        });
-
-        socket.on('disconnect', () => {
-          console.log('User disconnected')
-        });
+      socket.on('disconnect', () => {
+        console.log('User disconnected')
+      });
     } else {
       console.log("handshake rejected");
       socket.emit('rejected');
