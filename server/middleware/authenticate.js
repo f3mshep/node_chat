@@ -1,20 +1,16 @@
-const { User } = require('./../models/user');
+const jwt = require("jsonwebtoken");
 
-const authenticate = (req, res, next) => {
-  const token = req.header("x-auth");
-  User.findByToken(token)
-    .then(user => {
-      if (!user) {
-        return Promise.reject();
-      }
+SALT = process.env.JWT_SECRET;
 
-      req.user = user;
-      req.token = token;
-      next();
-    })
-    .catch(e => {
-      res.status(401).send({ error: "Authentication Required" });
-    });
+const isValidToken = (token) => {
+
+  try {
+    jwt.verify(token, SALT);
+  } catch (e) {
+    console.log('Bad token')
+    return false;
+  }
+  return true;
 };
 
-module.exports = { authenticate };
+module.exports = { isValidToken };

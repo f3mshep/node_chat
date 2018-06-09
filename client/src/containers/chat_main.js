@@ -46,18 +46,14 @@ class ChatMain extends React.Component{
     })
     .then(response => {
       if(!response.ok){
-        debugger
         console.log('bad attempt')
       } else {
         return response.json()
       }
     })
     .then(token => {
-      debugger
       localStorage.setItem("jwt", token)
-      socket.emit('authenticationAttempt')
-      socket.emit('authenticate', {token})
-      that.setState({signedIn: true})
+      socket.emit('authentication', {token})
     })
   }
 
@@ -73,7 +69,8 @@ class ChatMain extends React.Component{
       console.log('Connected to server')
     });
 
-    socket.on('authenticated', ()=>{
+    socket.on('confirmed', ()=>{
+      socket.emit('authenticated')
       console.log('user authenticated')
       socket.on("newMessage", this.recieveMessage.bind(this));
       socket.on("userJoin", this.updateUsers.bind(this));

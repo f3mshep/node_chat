@@ -12,7 +12,7 @@ const { ObjectID } = require("mongodb");
 const {generateMessage} = require('./utils/message')
 const {connectedUsers} = require('./utils/connected_users')
 const { User } = require('./models/user');
-const { authenticate } = require('./middleware/authenticate');
+const { isValidToken } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongo');
 
 PORT = process.env.PORT || 5000
@@ -31,10 +31,15 @@ io.on('connection', (socket)=>{
   console.log('New client connected')
   socket.authenticated = false
 
-  socket.on('authenticationAttempt', socketioJwt.authorize({
-    secret: SECRET,
-    timeout: 20000
-  }).bind(socket)).on('authenticated', socket => {
+  socket.on('authentication', auth => {
+    if (isValidToken(token.auth)){
+      socket.emit('confirmed')
+    } else {
+      socket.emit('rejected')
+    }
+  })
+
+  socket.on('authenticated', socket => {
     socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
     socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
     socket.username = data.username
