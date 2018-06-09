@@ -45,14 +45,22 @@ class ChatMain extends React.Component{
     })
     .then(response => {
       if(!response.ok){
+<<<<<<< HEAD
         console.log(response)
+=======
+        console.log('bad attempt')
+>>>>>>> 0f3b9a4b8d456aa554d716494dea5921862931e8
       } else {
         return response.json()
       }
     })
     .then(token => {
       localStorage.setItem("jwt", token)
+<<<<<<< HEAD
       socket.emit('authenticate', token)
+=======
+      socket.emit('authentication', {token})
+>>>>>>> 0f3b9a4b8d456aa554d716494dea5921862931e8
     })
   }
 
