@@ -36,9 +36,29 @@ class ChatMain extends React.Component{
   }
 
   handleSignIn(username, password){
-    const socket = this.state.clientSocket
-    socket.emit('signOn', {username, password})
-    this.setState({signedIn: true})
+    const socket = this.state.clientSocket;
+    const request = {username, password};
+    const that =  this;
+    fetch("/users", {
+      method: "post",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(request)
+    })
+    .then(response => {
+      if(!response.ok){
+        debugger
+        console.log('bad attempt')
+      } else {
+        return response.json()
+      }
+    })
+    .then(token => {
+      debugger
+      localStorage.setItem("jwt", token)
+      socket.emit('authenticationAttempt')
+      socket.emit('authenticate', {token})
+      that.setState({signedIn: true})
+    })
   }
 
   updateUsers(users){
@@ -53,29 +73,34 @@ class ChatMain extends React.Component{
       console.log('Connected to server')
     });
 
-    if (new Date().getUTCDay() === 3) {
-      socket.emit('createMessage', {
-        from: 'Admin',
-        text: 'It is Wednesday my dudes.'
-      }, function (data) {
-        console.log('Acknowledged', data)
-      });
-    } else {
-      socket.emit('createMessage', {
-        from: 'Admin',
-        text: 'Is this thing on?'
-      }, function (data) {
-        console.log('Acknowledged', data)
-      });
-    }
+    socket.on('authenticated', ()=>{
+      console.log('user authenticated')
+      socket.on("newMessage", this.recieveMessage.bind(this));
+      socket.on("userJoin", this.updateUsers.bind(this));
+      if (new Date().getUTCDay() === 3) {
+        socket.emit('createMessage', {
+          from: 'Admin',
+          text: 'It is Wednesday my dudes.'
+        }, function (data) {
+          console.log('Acknowledged', data)
+        });
+      } else {
+        socket.emit('createMessage', {
+          from: 'Admin',
+          text: 'Is this thing on?'
+        }, function (data) {
+          console.log('Acknowledged', data)
+        });
+      }
+    })
 
     socket.on('disconnect', () => {
       console.log('Disconnected from server')
     })
 
-    socket.on('userJoin', this.updateUsers.bind(this))
 
-    socket.on("newMessage", this.recieveMessage.bind(this));
+
+
 
   }
 

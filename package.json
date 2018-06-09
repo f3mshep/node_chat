@@ -25,7 +25,8 @@
     "mongodb": "^3.1.0-beta4",
     "mongoose": "^5.1.4",
     "nodemon": "^1.17.5",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "socketio-jwt": "github:root-core/socketio-jwt"
   },
   "devDependencies": {
     "expect": "^1.20.2",

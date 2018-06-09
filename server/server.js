@@ -1,5 +1,6 @@
 require("./config/config");
 
+const socketioJwt = require('socketio-jwt');
 const path = require('path');
 const bodyParser = require("body-parser");
 const express = require('express');
@@ -15,7 +16,7 @@ const { authenticate } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongo');
 
 PORT = process.env.PORT || 5000
-
+SECRET = process.env.JWT_SECRET
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
@@ -29,27 +30,32 @@ app.get("/api/hello", (req, res) => {
 io.on('connection', (socket)=>{
   console.log('New client connected')
   socket.authenticated = false
-  socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-  socket.broadcast.emit("newMessage", generateMessage("Admin","New user joined"));
 
-  socket.on('signOn', data => {
-    socket.username =  data.username
+  socket.on('authenticationAttempt', socketioJwt.authorize({
+    secret: SECRET,
+    timeout: 20000
+  }).bind(socket)).on('authenticated', socket => {
+    socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
+    socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
+    socket.username = data.username
     socket.authenticated = true
     let users = connectedUsers(io.sockets.connected)
     socket.emit('userJoin', users)
+
+    socket.on('createMessage', (message, callback) => {
+      console.log('New Message: ', message)
+      io.emit('newMessage', generateMessage(socket.username, message.text));
+      callback('Acknowledged');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected')
+    });
   })
 
 
 
-  socket.on('createMessage', (message, callback)=>{
-    console.log('New Message: ', message)
-    io.emit('newMessage', generateMessage(socket.username, message.text));
-    callback('Acknowledged');
-  });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected')
-  });
 });
 
 //authentication
@@ -61,7 +67,8 @@ app.post('/users', (req, res)=>{
     return newUser.generateAuthToken();
   })
     .then((token) => {
-      return res.header('x-auth', token).send(newUser);
+      return res.send({token})
+      //return res.header('x-auth', token).send(newUser);
     }).catch((error) => res.status(400).send({ error }));
 });
 
@@ -71,7 +78,7 @@ app.post('/users/login', (req, res)=>{
   .then(doc => {
     return doc.generateAuthToken()
     .then(token => {
-      res.header('x-auth', token).send(doc)
+      res.send(token)
     })
   })
 });
