@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import ChatMessages from './chat_messages'
 import ChatFooter from './chat_footer'
 import ChatSidebar from '../components/chat_sidebar'
-import SignIn from '../components/sign_in_component'
+import SignIn from '../containers/sign_in_container'
 
 class ChatMain extends React.Component{
 
@@ -36,27 +36,11 @@ class ChatMain extends React.Component{
     this.setState({messages: currentMessages})
   }
 
-  handleAccountCreation(username, password){
+  setToken(token){
     const socket = this.state.clientSocket;
-    const request = {username, password};
-    fetch("/users", {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(request)
-    })
-    .then(response => {
-      if(!response.ok){
-        //TODO: err handle here (modal maybe?)
-        console.log(response)
-      } else {
-        return response.json()
-      }
-    })
-    .then(auth => {
-      debugger
-      localStorage.setItem("jwt", auth.token)
-      socket.emit('authenticate', auth)
-    })
+    this.setState({token});
+    localStorage.setItem('jwt', token)
+    socket.emit('authenticate', token)
   }
 
   handleAuthentication(){
@@ -75,19 +59,20 @@ class ChatMain extends React.Component{
     //set up socket
     const socket = io();
     this.setState({clientSocket: socket});
+
     socket.on('connect', () => {
       console.log('Connected to server')
+      if(localStorage.jwt){
+        this.setToken(localStorage.jwt)
+        this.handleAuthentication()
+      }
     });
 
     socket.on('authenticated', ()=>{
       this.handleAuthentication()
       console.log('user authenticated')
       socket.on("newMessage", this.recieveMessage.bind(this));
-      socket.on("userJoin", this.updateUsers.bind(this));
-    })
-
-    socket.on('updateUsers', (users)=> {
-      this.updateUsers(users)
+      socket.on("updateUsers", this.updateUsers.bind(this));
     })
 
     socket.on('disconnect', () => {
@@ -106,7 +91,7 @@ class ChatMain extends React.Component{
         <ChatFooter sendMessage={this.sendMessage.bind(this)} />
       </div>
     </div>;
-    const signIn = <SignIn handleAccountCreation={this.handleAccountCreation.bind(this)}/>
+    const signIn = <SignIn setToken={this.setToken.bind(this)}/>
     return this.state.signedIn ? chatPage : signIn
   }
 }

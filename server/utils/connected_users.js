@@ -8,7 +8,9 @@ const getConnectedUsers = (sockets)=>{
 
 const getConnectedUsernames = (sockets) => {
   users = getConnectedUsers(sockets)
-  return users.map(user => user.username)
+  console.log('got connected users')
+  const userNames = users.map(user => user.username)
+  return [...new Set(userNames)];
 }
 
 module.exports = {getConnectedUsernames}

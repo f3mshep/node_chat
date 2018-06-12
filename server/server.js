@@ -30,7 +30,7 @@ app.get("/api/hello", (req, res) => {
 io.on('connection', (socket)=>{
   console.log('New client connected')
   let users = getConnectedUsernames(io.sockets.connected)
-  socket.broadcast("updateUsers", getConnectedUsernames(io.sockets.connected));
+
 
   socket.on('authenticate', token => {
     User.findByToken(token)
@@ -38,7 +38,7 @@ io.on('connection', (socket)=>{
       (user) => {
         socket.emit('authenticated')
         socket.username = user.username;
-        socket.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
+        io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
         //handle creating new messages
         socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
         socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
@@ -50,12 +50,11 @@ io.on('connection', (socket)=>{
         //handle disconnection
         socket.on('disconnect', () => {
           console.log('User disconnected')
-          socket.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
+          io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
         });
         },
       (err)=>{
         socket.emit('rejected')
-
       }
     )
   })

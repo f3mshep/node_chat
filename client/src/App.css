@@ -57,8 +57,8 @@ button:disabled {
   border: 1px solid #e1e1e1;
   border-radius: 5px;
   padding: 0px 20px;
-  margin: 20px;
-  width: 230px;
+  margin: 10px;
+  width: 240px;
 }
 
 .form-field {
@@ -72,6 +72,17 @@ button:disabled {
 .form-field label {
   display: block;
   margin-bottom: 7px;
+}
+
+.form-field a {
+  color:#607d8b;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 300;
+}
+
+.form-field a:active, a:hover {
+  color: #455a64;
 }
 
 .form-field input, .form-field select {
