@@ -21,9 +21,11 @@ class SignInForm extends React.Component{
     })
   }
 
+
+
   handleSubmit(event){
     event.preventDefault();
-    this.props.handleSignIn(this.state.username, this.state.password)
+    this.props.handleAccountCreation(this.state.username, this.state.password)
   }
 
   render(){

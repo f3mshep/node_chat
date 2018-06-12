@@ -30,29 +30,31 @@ app.get("/api/hello", (req, res) => {
 io.on('connection', (socket)=>{
   console.log('New client connected')
 
-  socket.on('authenticate',token => {
-    if(isValidToken(token)){
-      //change this, find User by token, then add info to socket.
-      console.log('handshake confirmed')
-      socket.emit('authenticated')
-      let users = getConnectedUsernames(io.sockets.connected)
-      socket.emit('updateUsers', users)
-      //handle creating new messages
-      socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-      socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
-      socket.on('createMessage', (message, callback) => {
-        console.log('New Message: ', message)
-        io.emit('newMessage', generateMessage(socket.username, message.text));
-        callback('Acknowledged');
-      });
+  socket.on('authenticate', auth => {
+    User.findByToken(auth.token)
+    .then(
+      (user) => {
+        socket.emit('authenticated')
+        socket.username = user.username;
+        let users = getConnectedUsernames(io.sockets.connected)
+        socket.emit('updateUsers', users)
+        //handle creating new messages
+        socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
+        socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
 
-      socket.on('disconnect', () => {
-        console.log('User disconnected')
-      });
-    } else {
-      console.log("handshake rejected");
-      socket.emit('rejected');
-    }
+        socket.on('createMessage', (message, callback) => {
+          io.emit('newMessage', generateMessage(socket.username, message.text));
+          callback('Acknowledged');
+        });
+        //handle disconnection
+        socket.on('disconnect', () => {
+          console.log('User disconnected')
+        });
+        },
+      (err)=>{
+        socket.emit('rejected')
+      }
+    )
   })
 
 });
@@ -86,3 +88,5 @@ app.post('/users/login', (req, res)=>{
 server.listen(PORT, ()=>{
   console.log(`Listening on ${PORT}`)
 });
+
+module.exports = app;

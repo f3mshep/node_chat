@@ -1,7 +1,7 @@
 const { User } = require('./../models/user');
 const jwt = require("jsonwebtoken");
 
-const isValidToken= (auth) => {
+const validateToken= (auth) => {
   try {
     decoded = jwt.verify(auth.token, SALT);
   } catch (e) {
@@ -10,4 +10,5 @@ const isValidToken= (auth) => {
   return true;
 };
 
-module.exports = { isValidToken };
+
+module.exports = { validateToken };

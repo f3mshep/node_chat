@@ -14,7 +14,8 @@ class ChatMain extends React.Component{
       signedIn: false,
       users: [],
       messages: [],
-      clientSocket: null
+      clientSocket: null,
+      token: null
     };
   }
 
@@ -35,7 +36,7 @@ class ChatMain extends React.Component{
     this.setState({messages: currentMessages})
   }
 
-  handleSignIn(username, password){
+  handleAccountCreation(username, password){
     const socket = this.state.clientSocket;
     const request = {username, password};
     fetch("/users", {
@@ -45,19 +46,25 @@ class ChatMain extends React.Component{
     })
     .then(response => {
       if(!response.ok){
+        //TODO: err handle here (modal maybe?)
         console.log(response)
       } else {
         return response.json()
       }
     })
-    .then(token => {
-      localStorage.setItem("jwt", token)
-      socket.emit('authenticate', token)
+    .then(auth => {
+      debugger
+      localStorage.setItem("jwt", auth.token)
+      socket.emit('authenticate', auth)
     })
   }
 
   handleAuthentication(){
     this.setState({signedIn: true})
+  }
+
+  handleRejection(){
+    console.log('OOOOOH! Rejected!')
   }
 
   updateUsers(users){
@@ -87,6 +94,8 @@ class ChatMain extends React.Component{
       console.log('Disconnected from server')
     })
 
+    socket.on('rejected', this.handleRejection.bind(this))
+
   }
 
   render(){
@@ -97,7 +106,7 @@ class ChatMain extends React.Component{
         <ChatFooter sendMessage={this.sendMessage.bind(this)} />
       </div>
     </div>;
-    const signIn = <SignIn handleSignIn={this.handleSignIn.bind(this)}/>
+    const signIn = <SignIn handleAccountCreation={this.handleAccountCreation.bind(this)}/>
     return this.state.signedIn ? chatPage : signIn
   }
 }
