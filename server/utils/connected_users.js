@@ -8,7 +8,6 @@ const getConnectedUsers = (sockets)=>{
 
 const getConnectedUsernames = (sockets) => {
   users = getConnectedUsers(sockets)
-  console.log(users)
   return users.map(user => user.username)
 }
 
