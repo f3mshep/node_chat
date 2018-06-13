@@ -23,14 +23,15 @@ const io = socketIO(server);
 
 app.use(bodyParser.json());
 
-app.get("/api/hello", (req, res) => {
-  res.send({ express: "Hello From Express" });
-});
+//sockets
+
+// TODO: Assign socket to username. Have user class manage its sockets
+// Can have static methods like #getAllUsersConnected
+// On sign on, can assign socket to user, when user signs off unassign socket
+// downsides: another point of failure
 
 io.on('connection', (socket)=>{
   console.log('New client connected')
-  let users = getConnectedUsernames(io.sockets.connected)
-
 
   socket.on('authenticate', token => {
     User.findByToken(token)
@@ -38,7 +39,9 @@ io.on('connection', (socket)=>{
       (user) => {
         socket.emit('authenticated')
         socket.username = user.username;
+        user.socketId = socket.id
         io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
+
         //handle creating new messages
         socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
         socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
@@ -50,6 +53,7 @@ io.on('connection', (socket)=>{
         //handle disconnection
         socket.on('disconnect', () => {
           console.log('User disconnected')
+          user.socketId = null;
           io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
         });
         },
@@ -58,7 +62,6 @@ io.on('connection', (socket)=>{
       }
     )
   })
-
 });
 
 //authentication

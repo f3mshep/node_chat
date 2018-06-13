@@ -19,6 +19,9 @@ const UserSchema = new mongoose.Schema({
     require: true,
     minlength: 6
   },
+  socketId: {
+    type: String
+  },
   tokens: [
     {
       access: {
@@ -62,6 +65,11 @@ UserSchema.methods.generateAuthToken = function () {
   return user.save().then(() => {
     return token;
   })
+}
+
+UserSchema.statics.getAllConnectedUsers = function () {
+  const User = this;
+  return User.find({}).then(users => users.filter(user => user.socket))
 }
 
 UserSchema.statics.findByToken = function (token) {
