@@ -12,6 +12,7 @@ const { ObjectID } = require("mongodb");
 const {generateMessage} = require('./utils/message')
 const { getConnectedUsernames } = require('./utils/connected_users')
 const { User } = require('./models/user');
+const { Room } = require('./models/room');
 const { isValidToken } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongo');
 
@@ -37,9 +38,9 @@ io.on('connection', (socket)=>{
     User.findByToken(token)
     .then(
       (user) => {
-        socket.emit('authenticated')
-        socket.username = user.username;
-        user.socketId = socket.id
+        //add user to socket
+        user.authenticateUser(socket);
+        //notify clients that a new user joined
         io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
 
         //handle creating new messages
@@ -53,7 +54,7 @@ io.on('connection', (socket)=>{
         //handle disconnection
         socket.on('disconnect', () => {
           console.log('User disconnected')
-          user.socketId = null;
+          user.handleDisconnect()
           io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
         });
         },
@@ -64,7 +65,7 @@ io.on('connection', (socket)=>{
   })
 });
 
-//authentication
+//authentication API endpoints
 
 app.post('/users', (req, res)=>{
   const body = _.pick(req.body, ['username', 'password'])

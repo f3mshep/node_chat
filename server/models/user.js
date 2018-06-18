@@ -22,6 +22,10 @@ const UserSchema = new mongoose.Schema({
   socketId: {
     type: String
   },
+  _currentRoom: {
+    type: Number,
+    ref: 'Room'
+  },
   tokens: [
     {
       access: {
@@ -67,9 +71,21 @@ UserSchema.methods.generateAuthToken = function () {
   })
 }
 
+UserSchema.methods.authenticateUser = function(socket) {
+  socket.emit('authenticated');
+  socket.username = this.username;
+  this.socketId = socket.id;
+  this.socket = socket
+}
+
+UserSchema.methods.removeUser = function(){
+  this.socketId = null
+  this.socket = null
+}
+
 UserSchema.statics.getAllConnectedUsers = function () {
   const User = this;
-  return User.find({}).then(users => users.filter(user => user.socket))
+  return User.find({}).then(users => users.filter(user => user.socketId))
 }
 
 UserSchema.statics.findByToken = function (token) {
