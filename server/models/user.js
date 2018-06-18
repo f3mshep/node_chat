@@ -72,13 +72,13 @@ UserSchema.methods.generateAuthToken = function () {
 }
 
 UserSchema.methods.authenticateUser = function(socket) {
-  socket.emit('authenticated');
+  socket.emit('authenticated', {username: this.username});
   socket.username = this.username;
   this.socketId = socket.id;
   this.socket = socket
 }
 
-UserSchema.methods.removeUser = function(){
+UserSchema.methods.handleDisconnect = function(){
   this.socketId = null
   this.socket = null
 }

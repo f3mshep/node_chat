@@ -126,6 +126,12 @@ button:disabled {
 }
 
 .chat__sidebar li:before {
+    content: '●';
+    margin: 0 0.5em;
+    color: #ffffffc4;
+}
+
+.chat__sidebar li:before.logged_out {
     content: '○';
     margin: 0 0.5em;
 }

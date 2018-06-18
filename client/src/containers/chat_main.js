@@ -15,6 +15,7 @@ class ChatMain extends React.Component{
       users: [],
       messages: [],
       clientSocket: null,
+      username: null,
       token: null
     };
   }
@@ -43,8 +44,11 @@ class ChatMain extends React.Component{
     socket.emit('authenticate', token)
   }
 
-  handleAuthentication(){
-    this.setState({signedIn: true})
+  handleAuthentication(auth){
+    this.setState({
+      signedIn: true,
+      username: auth.username
+    })
   }
 
   handleRejection(){
@@ -64,12 +68,11 @@ class ChatMain extends React.Component{
       console.log('Connected to server')
       if(localStorage.jwt){
         this.setToken(localStorage.jwt)
-        this.handleAuthentication()
       }
     });
 
-    socket.on('authenticated', ()=>{
-      this.handleAuthentication()
+    socket.on('authenticated', (auth)=>{
+      this.handleAuthentication(auth)
       console.log('user authenticated')
       socket.on("newMessage", this.recieveMessage.bind(this));
       socket.on("updateUsers", this.updateUsers.bind(this));
