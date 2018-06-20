@@ -24,6 +24,13 @@ RoomSchema.methods.removeUser = function(removedUser){
   Room.currentUsers = Room.currentUsers.filter(user => user !== removedUser );
 }
 
+RoomSchema.static.findByName = function(name){
+  return this.findOne({ name }).then(room => {
+    if (!name) return Promise.reject();
+    return room;
+  })
+}
+
 
 const Room = mongoose.model('Room', RoomSchema)
 

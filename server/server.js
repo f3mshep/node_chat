@@ -40,17 +40,30 @@ io.on('connection', (socket)=>{
       (user) => {
         //add user to socket
         user.authenticateUser(socket);
+        user.joinRoom()
+        socket.emit('roomJoined', user._currentRoom)
         //notify clients that a new user joined
         io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
 
-        //handle creating new messages
+        //server notifications
         socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
         socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
 
+        // new messages
         socket.on('createMessage', (message, callback) => {
           io.emit('newMessage', generateMessage(socket.username, message.text));
           callback('Acknowledged');
         });
+
+        // handle room join
+        socket.on('joinRoom', (roomObj)=>{
+          Room.findByName(roomObj.name).then(room => {
+            user.joinRoom(room)
+            socket.join(room.name)
+            socket.emit('roomJoined', room )
+          }).catch(err => socket.emit('rejected', err))
+        })
+
         //handle disconnection
         socket.on('disconnect', () => {
           console.log('User disconnected')

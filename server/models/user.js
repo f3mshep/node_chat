@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 const bcryptjs = require("bcryptjs");
 
+const Room = require('./room');
+
 AUTH = "auth";
 SALT = process.env.JWT_SECRET;
 
@@ -58,6 +60,11 @@ UserSchema.methods.removeToken = function  (token) {
     }
   })
 };
+
+UserSchema.methods.joinRoom = function (room) {
+  this._currentRoom = room
+  room.addUser(this)
+}
 
 UserSchema.methods.generateAuthToken = function () {
   let user = this;
