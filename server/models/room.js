@@ -10,13 +10,13 @@ const RoomSchema = new mongoose.Schema({
   },
   currentUsers: [{
     type: Number,
-    ref: 'User'
+    ref: 'User',
+    default: []
   }]
 })
 
-RoomSchema.methods.addUser = function(socket, user){
+RoomSchema.methods.addUser = function(user){
   const Room = this;
-  socket.join(Room.name);
   Room.currentUsers.push(user);
 }
 

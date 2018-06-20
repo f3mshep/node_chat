@@ -39,7 +39,7 @@ io.on('connection', (socket)=>{
       (user) => {
         //add user to socket
         middleware.authenticateUser(user,socket);
-        middleware.joinRoom(user, room)
+        middleware.joinRoom(user, user._currentRoom)
 
         //notify clients that a new user joined
         io.emit("updateUsers", middleware.getConnectedUsernames(io.sockets.connected));
@@ -65,7 +65,7 @@ io.on('connection', (socket)=>{
         socket.on('disconnect', () => {
           console.log('User disconnected')
           user.handleDisconnect()
-          io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
+          io.emit("updateUsers", middleware.getConnectedUsernames(io.sockets.connected));
         });
         },
       (err)=>{

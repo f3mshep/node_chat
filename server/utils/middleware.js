@@ -1,3 +1,5 @@
+const { Room } = require("../models/room");
+
 const getConnectedUsers = (sockets)=>{
   users = []
   for (const client in sockets){
@@ -28,10 +30,30 @@ const authenticateUser = (user, socket) => {
   user.save()
 }
 
-const joinRoom = (user, room) => {
-  user.joinRoom(room)
+const findDefaultRoom = () => {
+  return Room.find({}).then(rooms => {
+    if (!rooms.length){
+      const newRoom = new Room({name: "General"});
+      newRoom.save().then(()=> newRoom)
+    } else {
+      return rooms[0];
+    }
+  });
+}
+
+const assignRoom = (user, room) => {
   user.socket.join(room.name)
   user.socket.emit('roomJoined', room)
+}
+
+const joinRoom = (user, room) => {
+  if(!room){
+    findDefaultRoom().then(room => {
+      assignRoom(user, room)
+    }).catch(err => console.log(err))
+  } else {
+    assignRoom(user, room)
+  }
 }
 
 module.exports = { getConnectedUsernames, generateMessage, authenticateUser, joinRoom };
