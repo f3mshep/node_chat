@@ -9,8 +9,7 @@ const http = require('http');
 const _ = require('lodash');
 const { ObjectID } = require("mongodb");
 
-const {generateMessage} = require('./utils/message')
-const { getConnectedUsernames } = require('./utils/connected_users')
+const middleware = require('./utils/middleware')
 const { User } = require('./models/user');
 const { Room } = require('./models/room');
 const { isValidToken } = require('./middleware/authenticate');
@@ -39,28 +38,26 @@ io.on('connection', (socket)=>{
     .then(
       (user) => {
         //add user to socket
-        user.authenticateUser(socket);
-        user.joinRoom()
-        socket.emit('roomJoined', user._currentRoom)
+        middleware.authenticateUser(user,socket);
+        middleware.joinRoom(user, room)
+
         //notify clients that a new user joined
-        io.emit("updateUsers", getConnectedUsernames(io.sockets.connected));
+        io.emit("updateUsers", middleware.getConnectedUsernames(io.sockets.connected));
 
         //server notifications
-        socket.emit("newMessage", generateMessage('Admin', 'Welcome to NodeChat'));
-        socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
+        socket.emit("newMessage", middleware.generateMessage('Admin', 'Welcome to NodeChat'));
+        socket.broadcast.emit("newMessage", middleware.generateMessage("Admin", "New user joined"));
 
         // new messages
         socket.on('createMessage', (message, callback) => {
-          io.emit('newMessage', generateMessage(socket.username, message.text));
+          io.emit('newMessage', middleware.generateMessage(socket.username, message.text));
           callback('Acknowledged');
         });
 
         // handle room join
         socket.on('joinRoom', (roomObj)=>{
           Room.findByName(roomObj.name).then(room => {
-            user.joinRoom(room)
-            socket.join(room.name)
-            socket.emit('roomJoined', room )
+            middleware.joinRoom(user, room)
           }).catch(err => socket.emit('rejected', err))
         })
 
