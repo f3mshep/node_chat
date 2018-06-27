@@ -43,6 +43,8 @@ const findDefaultRoom = () => {
 
 const assignRoom = (user, room) => {
   user.socket.join(room.name)
+  user.socket.room = room.name
+  console.log(`${user.username} joined ${room.name}`)
   user.socket.emit('roomJoined', room)
 }
 

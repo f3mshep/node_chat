@@ -50,7 +50,7 @@ io.on('connection', (socket)=>{
 
         // new messages
         socket.on('createMessage', (message, callback) => {
-          io.emit('newMessage', middleware.generateMessage(socket.username, message.text));
+          io.to(socket.room).emit('newMessage', middleware.generateMessage(socket.username, message.text));
           callback('Acknowledged');
         });
 
